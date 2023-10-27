@@ -1,0 +1,312 @@
+---
+title: "Reporte invididual de la Situación Problema"
+author: "ALEJANDRO CHARLES GONZALEZ - A00835903"
+date: "2023-06-16"
+output: word_document
+---
+
+# INTRODUCCIÓN 
+
+La calidad del aire es un tema de vital importancia que afecta la salud y el bienestar de las personas, especialmente en las grandes ciudades como la Ciudad de México. La contaminación atmosférica, causada por la presencia de partículas sólidas y gases tóxicos en el aire, representa un grave riesgo para la salud humana y el medio ambiente. Es por ello que resulta fundamental abordar y medir de manera precisa este problema.
+
+Según el informe de Greenpeace, la Ciudad de México se encuentra entre las ciudades más contaminadas del mundo. Este dato alarmante destaca la necesidad urgente de tomar medidas para mejorar la calidad del aire en la zona metropolitana. 
+
+En este contexto, el análisis de los datos proporcionados por la Dirección de Monitoreo de la Ciudad de México, obtenidos de las estaciones meteorológicas, se vuelve esencial para comprender la magnitud y la naturaleza de la problemática.
+
+Mediante el análisis de estos datos, se podrán identificar patrones, tendencias y factores que contribuyen a la mala calidad del aire en la zona metropolitana.
+
+El presente documento tiene como objetivo abordar la importancia de atender la calidad del aire en la Ciudad de México, utilizando los datos disponibles y las herramientas conceptuales aprendidas en el curso. A través del análisis y la interpretación de estos datos, se buscará generar conocimientos valiosos que ayuden a comprender mejor el problema y proponer posibles soluciones para mitigar los efectos de la contaminación atmosférica.
+
+## PREGUNTA DE INVESTIGACIÓN Y VARIABLES ASOCIADAS
+
+Después de explorar las bases de datos disponibles, hemos seleccionado la base de datos de la estación metereológica "Camarones" ubicada en el municipio de Azcapotzalco en la Ciudad de México, estaremos analizando sus datos del 2022 conservados en el archivo "CAM2022.csv" para nuestra pregunta de investigación. Esta base de datos contiene información sobre diferentes gases contaminantes, como CO, NO, NO2, NOX, O3 y PM10.
+
+### PREGUNTA DE INVESTIGACIÓN
+
+¿Cuál es el impacto de los niveles de contaminación atmosférica en la concentración de partículas suspendidas de menos de 10 micrómetros (PM10) en la zona metropolitana de la Ciudad de México?
+
+### VARIABLE DE RESPUESTA (VARIABLE DEPENDIENTE)
+
+Concentración de partículas suspendidas de menos de 10 micrómetros (PM10): Representa la cantidad de partículas sólidas o líquidas de tamaño pequeño presentes en el aire. Es una medida de la calidad del aire y su impacto en la salud humana.
+
+### REGRESORES (VARIABLES INDEPENDIENTES)
+
+Monóxido de Carbono (CO): Es un gas tóxico que se produce principalmente por la combustión incompleta de materiales orgánicos. Su presencia en el aire está relacionada con fuentes de contaminación como el tráfico vehicular y la quema de combustibles fósiles.
+
+Óxidos de Nitrógeno (NOx): Incluye gases como el dióxido de nitrógeno (NO2) y el monóxido de nitrógeno (NO). Estos gases se generan principalmente por la quema de combustibles fósiles en vehículos y procesos industriales.
+
+Ozono (O3): El ozono troposférico se forma a partir de la reacción de los óxidos de nitrógeno y los compuestos orgánicos volátiles en presencia de la radiación solar. Su concentración en la atmósfera está relacionada con la contaminación fotoquímica y la calidad del aire.
+
+Dióxido de Nitrógeno (NO2): Es un gas tóxico y un indicador común de la contaminación del aire causada por la combustión de combustibles fósiles.
+
+Estas variables nos permitirán analizar cómo los niveles de CO, NOx, O3 y NO2 se relacionan con la concentración de partículas suspendidas (PM10) en la Ciudad de México. El análisis de estas relaciones puede proporcionar información valiosa sobre los factores que influyen en la contaminación atmosférica y contribuir a la formulación de estrategias de mitigación y mejora de la calidad del aire.
+
+# MODELO OBTENIDO POR MI EQUIPO DE TRABAJO 
+
+## MODELO DE REGRESIÓN LINEAL MÚLTIPLE
+
+```{r}
+# Cargar los datos
+datos <- read.csv("E8CAM2022_sin_NA_muestra_aleat_1000.csv")
+
+# Modelo de regresión múltiple
+modelo_regresion_multiple <- lm(PM10 ~ CO + O3, data = datos)
+
+summary(modelo_regresion_multiple)
+# Mostrar la ecuación de regresión y su interpretación
+cat("ECUACIÓN DE REGRESIÓN LINEAL MÚLTIPLE:\n\n")
+cat("PM10 =", round(coef(modelo_regresion_multiple)[1], 2), "+", round(coef(modelo_regresion_multiple)[2], 2), "* CO +",  round(coef(modelo_regresion_multiple)[3], 2), "* O3\n")
+cat("\nINTERPRETACIÓN\n\nPara cada unidad de aumento en CO, manteniendo las demás variables constantes, se espera un aumento promedio de", round(coef(modelo_regresion_multiple)[2], 2), "en PM10. De manera similar, se interpreta el efecto de las demás variables predictoras.\n")
+
+# Revisar el ajuste del modelo (coeficiente de determinación)
+r_cuadrado <- summary(modelo_regresion_multiple)$adj.r.squared
+cat("\nAJUSTE DEL MODELO:\n\nCOEFICIENTE DE DETERMINACIÓN (R²) = ", r_cuadrado, "\n")
+cat("\nINTERPRETACIÓN \n\nEl", round(r_cuadrado * 100, 2), "% de la variabilidad en PM10 se explica por las variables predictoras incluidas en el modelo.")
+
+# Análisis de significancia del modelo
+resultado_anova <- anova(modelo_regresion_multiple)
+cat("\n \nANÁLISIS DE SIGNIFICANCIA DEL MODELO:\n")
+cat("\nHipótesis nula (H0): Los coeficientes de las variables predictoras son iguales a cero.\n\n")
+cat("Hipótesis alternativa (H1): Al menos uno de los coeficientes de las variables predictoras es diferente de cero.\n\n")
+cat("Regla de decisión: Rechazar H0 si el valor p asociado al estadístico F es menor que el nivel de significancia (por ejemplo, 0.001).\n\n")
+cat("Valor F:", resultado_anova$"F value"[1], "\n\n")
+cat("Valor p:", resultado_anova$"Pr(>F)"[1], "\n\n")
+if (resultado_anova$"Pr(>F)"[1] < 0.001) {
+  cat("Conclusión: Se rechaza la hipótesis nula (H0). Existe suficiente evidencia estadística para indicar que el modelo de regresión lineal múltiple es significativo, lo que indica que al menos una de las variables predictoras tiene un efecto significativo en PM10.\n\n")
+} else {
+  cat("Conclusión: No se rechaza la hipótesis nula (H0). Existe suficiente evidencia estadística para indicar que el modelo de regresión lineal múltiple no es significativo, lo que indica que las variables predictoras no tienen un efecto significativo en PM10.\n")
+}
+```
+
+			
+```{r}
+# Análisis de idoneidad del modelo y pruebas de hipótesis para los coeficientes
+resumen_lm_multiple <- summary(modelo_regresion_multiple)
+coeficientes_lm_multiple <- resumen_lm_multiple$coefficients
+
+cat("ANÁLISIS DE IDONEIDAD DEL MODELO Y PRUEBAS DE HIPÓTESIS PARA LOS COEFICIENTES:\n")
+
+# Iterar sobre los coeficientes
+for (i in 2:length(coeficientes_lm_multiple[, 1])) {
+  cat("\nVariable predictora:", row.names(coeficientes_lm_multiple)[i], "\n")
+  cat("Hipótesis nula (H0): El coeficiente de la variable predictora es igual a cero.\n")
+  cat("Hipótesis alternativa (H1): El coeficiente de la variable predictora es diferente de cero.\n")
+  cat("Regla de decisión: Rechazar H0 si el valor p asociado al estadístico t es menor que el nivel de significancia (por ejemplo, 0.001).\n")
+  cat("Estadístico de prueba (t):", coeficientes_lm_multiple[i, 3], "\n")
+  cat("Valor p:", coeficientes_lm_multiple[i, 4], "\n")
+  
+  # Realizar la conclusión según el valor p
+  if (coeficientes_lm_multiple[i, 4] < 0.001) {
+    cat("Conclusión: Existe evidencia suficiente para rechazar la hipótesis nula, lo que indica que la variable predictora", row.names(coeficientes_lm_multiple)[i], "tiene un efecto significativo en PM10.\n")
+  } else {
+    cat("Conclusión: No hay suficiente evidencia para rechazar la hipótesis nula, lo que indica que la variable predictora", row.names(coeficientes_lm_multiple)[i], "no tiene un efecto significativo en PM10.\n")
+  }
+}
+```
+		
+
+		
+```{r}
+
+# Análisis residual del modelo de regresión múltiple
+residuos_lm_multiple <- residuals(modelo_regresion_multiple)
+
+# Gráfica de residuos
+
+cat("GRÁFICA DE RESIDUOS\n\nINTERPRETACIÓN\n\nEn la gráfica de residuos, buscamos una distribución aleatoria de los puntos alrededor de la línea roja (que representa el valor cero). Esto indica homocedasticidad e independencia de los residuos. Si los puntos presentan un patrón o tendencia, indicaría una violación de estas suposiciones.\n\nSin contar los valores atípicos, no se observa alguna tendencia y los puntos no están alejados del 0, entonces se puede decir que tienen una varianza constante. Por
+ende, el modelo cumple el criterio de homocedasticidad.\n\n")
+
+plot(fitted(modelo_regresion_multiple), residuos_lm_multiple, pch = 16, col = "darkgreen",
+     xlab = "Valores Ajustados", ylab = "Residuos",
+     main = "Gráfica de Residuos", cex.main = 1.2, cex.lab = 1.2)
+
+# Agregar una línea horizontal en cero
+abline(h = 0, col = "red", lty = 2)
+
+# Leyendas de la gráfica
+legend("topright", legend = c("Residuos"), col = "darkgreen", pch = 16, bty = "n", cex = 1.2)
+
+# Prueba de normalidad para residuos (prueba de Shapiro-Wilk)
+cat("PRUEBA DE NORMALIDAD PARA RESIDUOS:\n\n")
+cat("Hipótesis nula (H0): Los residuos siguen una distribución normal.\n\n")
+cat("Hipótesis alternativa (H1): Los residuos no siguen una distribución normal.\n\n")
+cat("Regla de decisión: Rechazar H0 si el valor p asociado a la prueba de Shapiro-Wilk es menor que el nivel de significancia (por ejemplo, 0.001).\n\n")
+shapiro_test <- shapiro.test(residuos_lm_multiple)
+cat("Estadístico de prueba:", shapiro_test$statistic, "\n\n")
+cat("Valor p:", shapiro_test$p.value, "\n\n")
+
+if (shapiro_test$p.value < 0.001) {
+  cat("Conclusión: Rechazamos la hipótesis nula. Existe suficiente evidencia estadística para indicar que los residuos no siguen una distribución normal.\n")
+} else {
+  cat("Conclusión: No rechazamos la hipótesis nula. Existe suficiente evidencia estadística para indicar que los residuos siguen una distribución normal.\n")
+}
+
+# Prueba de hipótesis para media de residuos
+cat("\nPRUEBA DE HIPÓTESIS PARA MEDIA DE RESIDUOS:\n\n")
+cat("Hipótesis nula (H0): La media de los residuos es igual a cero.\n\n")
+cat("Hipótesis alternativa (H1): La media de los residuos es diferente de cero.\n\n")
+cat("Regla de decisión: Rechazar H0 si el valor p asociado a la prueba t es menor que el nivel de significancia (por ejemplo, 0.001).\n\n")
+t_test <- t.test(residuos_lm_multiple)
+cat("Estadístico de prueba (t):", t_test$statistic, "\n\n")
+cat("Valor p:", t_test$p.value, "\n\n")
+
+if (t_test$p.value < 0.001) {
+  cat("Conclusión: Existe evidencia suficiente para rechazar la hipótesis nula, lo que indica que la media de los residuos es diferente de cero.\n")
+} else {
+  cat("Conclusión: No hay suficiente evidencia para rechazar la hipótesis nula, lo que indica que la media de los residuos es igual a cero.\n")
+}
+
+```
+
+# NUEVO MODELO PROPUESTO INDIVIDUALMENTE
+## EN ESTE CASO MI PROPUESTA ES UN MODELO LINEAL 
+
+```{r}
+# Cargar los datos
+data <- read.csv("E8CAM2022_sin_NA_muestra_aleat_1000.csv")
+
+# Ajustar el modelo de regresión lineal
+model <- lm(PM10 ~ CO, data = data)
+
+# Mostrar la ecuación de regresión del modelo y su interpretación
+coefficients <- coef(model)
+intercept <- coefficients[1]
+slope <- coefficients[2]
+
+cat("La ecuación de regresión del modelo es: PM10 =", intercept, "+", slope, "* CO", "\n")
+cat("Interpretación: Por cada unidad de incremento en CO, se espera un cambio promedio de", slope, "en la concentración de PM10, manteniendo constante el resto de las variables.", "\n")
+
+# Revisar el ajuste del modelo (coeficiente de determinación)
+r_squared <- summary(model)$r.squared
+cat("El coeficiente de determinación (R²) del modelo es:", r_squared, "\n")
+
+# Analizar la significancia del modelo (valor F)
+anova_result <- anova(model)
+f_value <- anova_result$F[1]
+p_value <- anova_result$Pr[1]
+
+cat("Análisis de significancia del modelo:\n")
+cat("Hipótesis nula (H0): Los coeficientes del modelo son iguales a cero.\n")
+cat("Hipótesis alternativa (H1): Al menos uno de los coeficientes del modelo es diferente de cero.\n")
+cat("Regla de decisión: Rechazar H0 si el valor p es menor que el nivel de significancia (por ejemplo, 0.05).\n")
+cat("Estadístico de prueba (valor F):", f_value, "\n")
+cat("Valor p:", p_value, "\n")
+
+if (p_value < 0.05) {
+  cat("Conclusión: Se rechaza la hipótesis nula (H0). El modelo es significativo.\n")
+} else {
+  cat("Conclusión: No se rechaza la hipótesis nula (H0). El modelo no es significativo.\n")
+}
+```
+
+```{r}
+# Análisis de significancia de los coeficientes del modelo
+summary_result <- summary(model)
+coef_table <- summary_result$coefficients
+
+cat("Análisis de significancia de los coeficientes del modelo:\n")
+cat("-------------------------------------------------------------------\n")
+cat("Variable\t\tCoeficiente\t\tEstándar Error\t\tValor t\t\tValor p\n")
+cat("-------------------------------------------------------------------\n")
+
+for (i in 1:nrow(coef_table)) {
+  variable <- rownames(coef_table)[i]
+  coefficient <- coef_table[i, "Estimate"]
+  std_error <- coef_table[i, "Std. Error"]
+  t_value <- coef_table[i, "t value"]
+  p_value <- coef_table[i, "Pr(>|t|)"]
+  
+  cat(variable, "\t\t", coefficient, "\t\t", std_error, "\t\t", t_value, "\t\t", p_value, "\n")
+  
+  cat("Hipótesis nula (H0): El coeficiente", variable, "es igual a cero.\n")
+  cat("Hipótesis alternativa (H1): El coeficiente", variable, "es diferente de cero.\n")
+  cat("Regla de decisión: Rechazar H0 si el valor p es menor que el nivel de significancia (por ejemplo, 0.05).\n")
+  cat("Estadístico de prueba (valor t):", t_value, "\n")
+  cat("Valor p:", p_value, "\n")
+  
+  if (p_value < 0.05) {
+    cat("Conclusión: Se rechaza la hipótesis nula (H0). El coeficiente", variable, "es significativo.\n")
+  } else {
+    cat("Conclusión: No se rechaza la hipótesis nula (H0). El coeficiente", variable, "no es significativo.\n")
+  }
+  
+  cat("-------------------------------------------------------------------\n")
+}
+```
+
+```{r}
+# Obtener los residuos del modelo
+residuals <- residuals(model)
+
+# Gráfica de residuos
+plot(residuals, pch = 16, col = "steelblue", main = "Gráfica de Residuos", xlab = "Observación", ylab = "Residuo")
+abline(h = 0, col = "red", lty = 2)
+legend("topright", legend = c("Residuos", "Línea de referencia"), col = c("steelblue", "red"), pch = c(16, NA), lty = c(NA, 2))
+
+# Interpretación de la gráfica de residuos
+cat("Interpretación de la gráfica de residuos:\n")
+cat("1. Homocedasticidad: Se busca que los residuos estén dispersos de manera constante alrededor de cero sin patrones claros en forma de abanico o embudo.\n")
+cat("2. Independencia: Se busca que los residuos no presenten correlación o patrones sistemáticos entre ellos.\n")
+cat("3. Linealidad: Si el modelo es adecuado, no debería haber patrones sistemáticos en la gráfica de residuos.\n")
+
+# Prueba de normalidad para residuos (Prueba de Shapiro-Wilk)
+shapiro_test <- shapiro.test(residuals)
+p_value_shapiro <- shapiro_test$p.value
+
+cat("\nPrueba de normalidad para residuos (Prueba de Shapiro-Wilk):\n")
+cat("Hipótesis nula (H0): Los residuos siguen una distribución normal.\n")
+cat("Hipótesis alternativa (H1): Los residuos no siguen una distribución normal.\n")
+cat("Regla de decisión: Rechazar H0 si el valor p es menor que el nivel de significancia (por ejemplo, 0.05).\n")
+cat("Estadístico de prueba:", shapiro_test$statistic, "\n")
+cat("Valor p:", p_value_shapiro, "\n")
+
+if (p_value_shapiro < 0.05) {
+  cat("Conclusión: Se rechaza la hipótesis nula (H0). Los residuos no siguen una distribución normal.\n")
+} else {
+  cat("Conclusión: No se rechaza la hipótesis nula (H0). Los residuos siguen una distribución normal.\n")
+}
+
+# Prueba de hipótesis para media de residuos 0 vs diferente de 0
+t_test <- t.test(residuals, mu = 0)
+p_value_t <- t_test$p.value
+
+cat("\nPrueba de hipótesis para media de residuos 0 vs diferente de 0:\n")
+cat("Hipótesis nula (H0): La media de los residuos es igual a 0.\n")
+cat("Hipótesis alternativa (H1): La media de los residuos es diferente de 0.\n")
+cat("Regla de decisión: Rechazar H0 si el valor p es menor que el nivel de significancia (por ejemplo, 0.05).\n")
+cat("Estadístico de prueba (valor t):", t_test$statistic, "\n")
+cat("Valor p:", p_value_t, "\n")
+
+if (p_value_t < 0.05) {
+  cat("Conclusión: Se rechaza la hipótesis nula (H0). La media de los residuos es diferente de 0.\n")
+} else {
+  cat("Conclusión: No se rechaza la hipótesis nula (H0). La media de los residuos es igual a 0.\n")
+}
+
+```
+
+# COMPARACION DE MODELOS
+
+Para comparar el modelo de regresión lineal múltiple que obtuvimos anteriormente con el nuevo modelo de regresión lineal simple, podemos considerar varios aspectos:
+
+1- Ajuste del modelo: Podemos comparar los coeficientes de determinación (R²) de ambos modelos. Un R² más alto indica un mejor ajuste del modelo a los datos.
+ 
+  MODELO LINEAL SIMPLE= 0.230562 
+  MODELO LINEAL MULTIPLE = 0.292405
+  
+  EL MODELO LINEAL MULTIPLE TIENE UN MEJOR AJUSTE DEL MODELO DE LOS DATOS
+
+2- Significancia de los coeficientes: Podemos analizar la significancia de los coeficientes en cada modelo. Un modelo con coeficientes significativos indica una relación más fuerte entre las variables predictoras y la variable respuesta.
+
+  LOS DOS MANTIENEN SUS COEFICIENTES SIGNIFICATIVOS
+
+3- Evaluación de residuos: Podemos comparar los análisis de residuos de cada modelo, como la homocedasticidad, independencia y normalidad de los residuos. Un modelo con residuos más cercanos a las suposiciones del modelo de regresión lineal indica un mejor ajuste.
+  
+  AMBAS MEDIAS DE RESIDUOS ES IGUAL A 0 
+
+
+## CONCLUSION 
+
+EN CONCLUSION PODEMOS DETERMINAR QUE EL MODELO DE REGRESION LINEAL MULTIPLE ES MEJOR QUE EL PROPUESTO INDIVIDUALMENTE, ESTO DEBIDO A QUE TIENE UNA R² MAYOR, POR OTRA PARTE AL ESTAR ANALIZANDO MAS COEFICIENTES SIGNIFICATIVOS, PODEMOS DEDUCIR QUE TENDRA UN MEJOR IMPACTO Y SERA MAS PRECISO. SIN EMBARGO EL MODELO LINEAL SIMPLE NO SE ENCUENTRA MUY LEJOS DE EL Y TAMBIEN TIENE RESULTADOS PRECISOS.
+  
+  
